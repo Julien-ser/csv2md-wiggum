@@ -2,7 +2,7 @@
 
 A small command-line tool that converts a CSV file into a GitHub-flavoured Markdown table.
 
-**Status:** Task 2 — Core conversion complete (CSV → Markdown table with header + separator rows)
+**Status:** Task 3 — Stdin input complete (reads from stdin when no file given or `-` used)
 
 ## Requirements
 

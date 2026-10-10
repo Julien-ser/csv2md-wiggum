@@ -18,6 +18,22 @@ def test_module_runs_no_args():
     assert result.returncode == 0
 
 
+def test_module_no_args_reads_stdin_csv():
+    """python -m csv2md with no file arg converts CSV from stdin."""
+    csv_input = "Name,Age\nAlice,30\n"
+    result = subprocess.run(
+        [sys.executable, "-m", "csv2md"],
+        input=csv_input,
+        capture_output=True,
+        text=True,
+        cwd=".",
+    )
+    assert result.returncode == 0
+    assert "| Name | Age |" in result.stdout
+    assert "| --- | --- |" in result.stdout
+    assert "| Alice | 30 |" in result.stdout
+
+
 def test_cli_converts_csv_file():
     """python -m csv2md converts a CSV file to Markdown."""
     csv_content = "Name,Age\nAlice,30\nBob,25\n"

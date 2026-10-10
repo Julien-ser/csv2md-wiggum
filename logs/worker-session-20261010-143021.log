@@ -1,0 +1,26 @@
+🚀 Starting Wiggum Worker for: csv2md-wiggum
+📍 Project Path: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum
+⏰ Started at: Sat Oct 10 14:30:21 EDT 2026
+⚡ Token Budget: 64000
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━════
+
+📍 Iteration 6 at Sat Oct 10 14:30:21 EDT 2026...
+🔍 Checking CI errors for: Julien-ser/csv2md-wiggum
+✅ No recent CI failures found
+🤖 OpenCode processing: Task 3: Add reading from stdin when no file path is given or the path is a single dash, with pytest tests
+[0m
+> build · poolside/laguna-s-2.1:free
+[0m
+[0m$ [0mcat .agent_role 2>/dev/null || echo "generic"
+generic
+[0m
+[0m→ [0mRead TASKS.md
+[0m→ [0mRead README.md
+[0m→ [0mRead csv2md/cli.py
+[0m→ [0mRead csv2md/core.py
+[0m✱ [0mGlob "tests/**/*.py"[90m in . · 3 matches[0m
+[0m→ [0mRead tests/test_cli.py
+[0m→ [0mRead tests/test_core.py
+[0m✱ [0mGlob "csv2md/**/*.py"[90m in . · 4 matches[0m
+[0m→ [0mRead csv2md/__main__.py
+[0m→ [0mRead csv2md/__init__.py

@@ -46,3 +46,31 @@ class TestConvert:
         rows = [["A", "B"], ["", ""]]
         result = convert(rows)
         assert result == "| A | B |\n| --- | --- |\n|  |  |"
+
+    def test_align_left(self):
+        """Align left produces :--- in the separator."""
+        rows = [["A", "B"], ["1", "2"]]
+        result = convert(rows, align="left")
+        expected = "| A | B |\n| :--- | :--- |\n| 1 | 2 |"
+        assert result == expected
+
+    def test_align_right(self):
+        """Align right produces ---: in the separator."""
+        rows = [["A", "B"], ["1", "2"]]
+        result = convert(rows, align="right")
+        expected = "| A | B |\n| ---: | ---: |\n| 1 | 2 |"
+        assert result == expected
+
+    def test_align_center(self):
+        """Align center produces :--: in the separator."""
+        rows = [["A", "B"], ["1", "2"]]
+        result = convert(rows, align="center")
+        expected = "| A | B |\n| :--: | :--: |\n| 1 | 2 |"
+        assert result == expected
+
+    def test_align_default_none(self):
+        """No alignment produces --- in the separator."""
+        rows = [["A", "B"], ["1", "2"]]
+        result = convert(rows, align=None)
+        expected = "| A | B |\n| --- | --- |\n| 1 | 2 |"
+        assert result == expected

@@ -6,8 +6,10 @@ Public functions:
 
 from __future__ import annotations
 
+type Align = "left" | "right" | "center" | None
 
-def convert(rows: list[list[str]]) -> str:
+
+def convert(rows: list[list[str]], align: Align = None) -> str:
     """Convert a list of CSV rows into a GitHub-flavoured Markdown table.
 
     The first row is treated as the header row. A separator row
@@ -15,7 +17,9 @@ def convert(rows: list[list[str]]) -> str:
 
     Args:
         rows: A list of rows, where each row is a list of string cell values.
-              The first row is treated as the header.
+            The first row is treated as the header.
+        align: Column alignment. One of ``"left"``, ``"right"``,
+            ``"center"``, or ``None`` (default, no alignment).
 
     Returns:
         A Markdown table as a string, or an empty string if *rows* is empty.
@@ -31,12 +35,34 @@ def convert(rows: list[list[str]]) -> str:
     lines: list[str] = []
 
     lines.append(_format_row(header))
-    lines.append(_format_row(["---"] * len(header)))
+    lines.append(_format_separator(len(header), align))
 
     for row in rows[1:]:
         lines.append(_format_row(row))
 
     return "\n".join(lines)
+
+
+def _format_separator(ncols: int, align: Align = None) -> str:
+    """Build the separator row for *ncols* columns with optional alignment.
+
+    Args:
+        ncols: Number of columns in the table.
+        align: One of ``"left"``, ``"right"``, ``"center"``, or ``None``.
+
+    Returns:
+        A separator row string like ``| --- | --- |`` or ``| :--- | ---: |``.
+    """
+    if align == "left":
+        cell = ":---"
+    elif align == "right":
+        cell = "---:"
+    elif align == "center":
+        cell = ":--:"
+    else:
+        cell = "---"
+
+    return _format_row([cell] * ncols)
 
 
 def _format_row(cells: list[str]) -> str:

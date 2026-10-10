@@ -68,3 +68,32 @@ def test_cli_stdin_dash():
     )
     assert result.returncode == 0
     assert "| Name | Age |" in result.stdout
+
+
+def test_cli_align_center():
+    """--align center produces :-: separators."""
+    csv_input = "Name,Age\nAlice,30\n"
+    result = subprocess.run(
+        [sys.executable, "-m", "csv2md", "--align", "center"],
+        input=csv_input,
+        capture_output=True,
+        text=True,
+        cwd=".",
+    )
+    assert result.returncode == 0
+    assert "| Name | Age |" in result.stdout
+    assert "| :-: | :-: |" in result.stdout
+
+
+def test_cli_align_short_flag():
+    """-a right produces ---: separators."""
+    csv_input = "Name,Age\nAlice,30\n"
+    result = subprocess.run(
+        [sys.executable, "-m", "csv2md", "-a", "right"],
+        input=csv_input,
+        capture_output=True,
+        text=True,
+        cwd=".",
+    )
+    assert result.returncode == 0
+    assert "| ---: | ---: |" in result.stdout

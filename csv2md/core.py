@@ -67,6 +67,45 @@ def _format_separator(ncols: int, align: Align = None) -> str:
     return _format_row([cell] * ncols)
 
 
+def _escape_cells(cells: list[str]) -> list[str]:
+    """Escape pipe characters and replace newlines in cell values.
+
+    Pipe characters (``|``) are escaped as ``\\|`` so they do not
+    break the Markdown table structure. Newline characters (both ``\\n``
+    and ``\\r``) are replaced with ``<br>`` tags to keep each row on
+    a single line.
+
+    Args:
+        cells: A list of raw cell string values.
+
+    Returns:
+        A new list of escaped cell strings.
+    """
+    escaped: list[str] = []
+    for cell in cells:
+        cell = cell.replace("|", "\\|")
+        cell = cell.replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
+        escaped.append(cell)
+    return escaped
+
+
+def _pad_row(row: list[str], width: int) -> list[str]:
+    """Pad a row with empty strings up to *width* columns.
+
+    If *row* has more cells than *width*, it is returned unchanged.
+
+    Args:
+        row: The row to potentially pad.
+        width: The target number of columns (the header width).
+
+    Returns:
+        A row list padded to *width* columns.
+    """
+    if len(row) < width:
+        row = row + [""] * (width - len(row))
+    return row
+
+
 def _format_row(cells: list[str]) -> str:
     """Format a list of cells as a Markdown table row.
 

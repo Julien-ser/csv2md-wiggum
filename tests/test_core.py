@@ -74,3 +74,49 @@ class TestConvert:
         result = convert(rows, align=None)
         expected = "| A | B |\n| --- | --- |\n| 1 | 2 |"
         assert result == expected
+
+    def test_escape_pipe(self):
+        """Pipe characters in cells are escaped with backslash."""
+        rows = [["A|B", "B"], ["1", "2"]]
+        result = convert(rows)
+        assert "| A\\|B | B |" in result
+
+    def test_escape_pipe_in_header(self):
+        """Pipe characters in header cells are escaped."""
+        rows = [["A|B", "C"], ["1", "2"]]
+        result = convert(rows)
+        assert "| A\\|B | C |" in result
+
+    def test_newline_replaced_with_br(self):
+        """Newlines in cell values are replaced with <br> tags."""
+        rows = [["Desc"], ["line1\nline2"]]
+        result = convert(rows)
+        assert "<br>" in result
+        assert "line1<br>line2" in result
+
+    def test_newline_and_carriage_return_replaced(self):
+        """Carriage returns and CRLF newlines are replaced with <br>."""
+        rows = [["Text"], ["line1\r\nline2\rline3"]]
+        result = convert(rows)
+        assert "line1<br>line2<br>line3" in result
+
+    def test_escape_pipe_and_newline_combined(self):
+        """Both pipe escaping and newline replacement happen in one cell."""
+        rows = [["A|B"], ["x\ny|z"]]
+        result = convert(rows)
+        assert "| A\\|B |" in result
+        assert "x<br>y\\|z" in result
+
+    def test_short_row_padded(self):
+        """A row shorter than the header is padded with empty cells."""
+        rows = [["A", "B", "C"], ["1"]]
+        result = convert(rows)
+        expected = "| A | B | C |\n| --- | --- | --- |\n| 1 |  |  |"
+        assert result == expected
+
+    def test_short_row_padded_with_br(self):
+        """Short rows are still escaped and padded correctly."""
+        rows = [["A|B", "C"], ["1"]]
+        result = convert(rows)
+        assert "| A\\|B | C |" in result
+        assert "| 1 |  |" in result

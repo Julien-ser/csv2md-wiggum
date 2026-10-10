@@ -2,7 +2,7 @@
 
 A small command-line tool that converts a CSV file into a GitHub-flavoured Markdown table.
 
-**Status:** Task 4 — `--align` option complete (left, right, center alignment)
+**Status:** Task 5 — Cell escaping (pipes, newlines) and short-row padding complete
 
 ## Requirements
 
@@ -35,6 +35,8 @@ python -m csv2md [options] [file]
 | `--align left` | Align columns left (`:---`). |
 | `--align right` | Align columns right (`:--:`). |
 | `--align center` | Align columns center (`:--:`). |
+
+Cells containing pipe characters (`|`) are automatically escaped so the table structure is preserved. Newlines within cells are converted to `<br>` tags. Rows shorter than the header row are padded with empty cells.
 
 ## Sample Input and Output
 

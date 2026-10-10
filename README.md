@@ -1,8 +1,8 @@
 # csv2md
 
-A small command-line tool that converts a CSV file into a GitHub-flavoured Markdown table.
+A small command-line tool that converts a CSV file into a GitHub-flavoured Markdown table. Standard library only (argparse, csv).
 
-**Status:** Task 5 — Cell escaping (pipes, newlines) and short-row padding complete
+**Status:** Task 7 — Clean error handling complete
 
 ## Requirements
 
@@ -27,18 +27,84 @@ python -m csv2md
 python -m csv2md [options] [file]
 ```
 
+If *file* is omitted or set to `-`, input is read from stdin.
+
 ## Options
 
 | Option | Description |
 |--------|-------------|
 | `file` | Path to a CSV file. If omitted or `-`, reads from stdin. |
-| `--align left` | Align columns left (`:---`). |
-| `--align right` | Align columns right (`:--:`). |
-| `--align center` | Align columns center (`:--:`). |
+| `-a left` / `--align left` | Align columns left (`:---`). |
+| `-a right` / `--align right` | Align columns right (`---:`). |
+| `-a center` / `--align center` | Align columns center (`:--:`). |
+| `--no-header` | Treat the first row as data instead of a header; emit an empty header row. |
 
-Cells containing pipe characters (`|`) are automatically escaped so the table structure is preserved. Newlines within cells are converted to `<br>` tags. Rows shorter than the header row are padded with empty cells.
+### Error handling
+
+The tool handles errors gracefully:
+
+- **Missing file** — prints `csv2md: cannot open file: <path>` to stderr, exits 1.
+- **Empty input** — prints `csv2md: empty input` to stderr, exits 1.
+- **Malformed CSV** — prints `csv2md: malformed CSV: <detail>` to stderr, exits 1.
+
+In all error cases, no traceback is shown.
 
 ## Sample Input and Output
+
+### Input (`sample.csv`)
+
+```csv
+Name,Age,City
+Alice,30,"New York"
+Bob,25,"San Francisco"
+```
+
+### Output
+
+```markdown
+| Name | Age | City |
+| --- | --- | --- |
+| Alice | 30 | New York |
+| Bob | 25 | San Francisco |
+```
+
+### With alignment
+
+```bash
+python -m csv2md --align center sample.csv
+```
+
+```markdown
+| Name | Age | City |
+| :--: | :--: | :--: |
+| Alice | 30 | New York |
+| Bob | 25 | San Francisco |
+```
+
+### Without header
+
+```bash
+python -m csv2md --no-header sample.csv
+```
+
+```markdown
+|  |  |  |
+| --- | --- | --- |
+| Name | Age | City |
+| Alice | 30 | New York |
+| Bob | 25 | San Francisco |
+```
+
+### From stdin
+
+```bash
+echo "a,b,c" | python -m csv2md
+```
+
+```markdown
+| a | b | c |
+| --- | --- | --- |
+```
 
 ## Development
 

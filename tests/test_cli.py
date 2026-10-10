@@ -8,7 +8,7 @@ from textwrap import dedent
 
 
 def test_module_runs_no_args():
-    """python -m csv2md with no args reads from stdin and exits 0."""
+    """python -m csv2md with no args and empty stdin exits 1."""
     result = subprocess.run(
         [sys.executable, "-m", "csv2md"],
         input="",
@@ -16,7 +16,8 @@ def test_module_runs_no_args():
         text=True,
         cwd=".",
     )
-    assert result.returncode == 0
+    assert result.returncode == 1
+    assert "empty input" in result.stderr
 
 
 def test_module_no_args_reads_stdin_csv():
@@ -155,7 +156,7 @@ def test_cli_empty_file():
             text=True,
             cwd=".",
         )
-         assert result.returncode == 1
+        assert result.returncode == 1
         assert "empty input" in result.stderr
     finally:
         empty_path.unlink(missing_ok=True)

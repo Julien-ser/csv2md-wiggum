@@ -82,7 +82,7 @@ def test_cli_align_center():
     )
     assert result.returncode == 0
     assert "| Name | Age |" in result.stdout
-    assert "| :-: | :-: |" in result.stdout
+    assert "| :--: | :--: |" in result.stdout
 
 
 def test_cli_align_short_flag():

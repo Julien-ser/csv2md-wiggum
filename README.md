@@ -2,7 +2,7 @@
 
 A small command-line tool that converts a CSV file into a GitHub-flavoured Markdown table.
 
-**Status:** Task 3 — Stdin input complete (reads from stdin when no file given or `-` used)
+**Status:** Task 4 — `--align` option complete (left, right, center alignment)
 
 ## Requirements
 
@@ -27,8 +27,16 @@ python -m csv2md
 python -m csv2md [options] [file]
 ```
 
-- If no file is given (or `-` is used), input is read from stdin.
-- A file path points to a CSV file to convert.
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `file` | Path to a CSV file. If omitted or `-`, reads from stdin. |
+| `--align left` | Align columns left (`:---`). |
+| `--align right` | Align columns right (`:--:`). |
+| `--align center` | Align columns center (`:--:`). |
+
+## Sample Input and Output
 
 ## Development
 

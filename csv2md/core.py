@@ -9,17 +9,19 @@ from __future__ import annotations
 type Align = "left" | "right" | "center" | None
 
 
-def convert(rows: list[list[str]], align: Align = None) -> str:
+def convert(rows: list[list[str]], align: Align = None, no_header: bool = False) -> str:
     """Convert a list of CSV rows into a GitHub-flavoured Markdown table.
 
-    The first row is treated as the header row. A separator row
+    By default the first row is treated as the header row and a separator row
     (``| --- | --- | ...``) is inserted between the header and data rows.
 
     Args:
         rows: A list of rows, where each row is a list of string cell values.
-            The first row is treated as the header.
+            The first row is treated as the header unless *no_header* is set.
         align: Column alignment. One of ``"left"``, ``"right"``,
             ``"center"``, or ``None`` (default, no alignment).
+        no_header: When ``True``, the first row is treated as data and an
+            empty header row is emitted instead.
 
     Returns:
         A Markdown table as a string, or an empty string if *rows* is empty.
@@ -31,14 +33,17 @@ def convert(rows: list[list[str]], align: Align = None) -> str:
     if not rows:
         return ""
 
-    header = rows[0]
-    width = len(header)
+    width = len(rows[0])
     lines: list[str] = []
 
-    lines.append(_format_row(_escape_cells(header)))
+    if no_header:
+        lines.append(_format_row([""] * width))
+    else:
+        lines.append(_format_row(_escape_cells(rows[0])))
     lines.append(_format_separator(width, align))
 
-    for row in rows[1:]:
+    data = rows if no_header else rows[1:]
+    for row in data:
         padded = _pad_row(row, width)
         lines.append(_format_row(_escape_cells(padded)))
 

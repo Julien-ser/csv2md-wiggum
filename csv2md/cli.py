@@ -37,6 +37,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Align columns left, right, or center (default: no alignment).",
     )
     parser.add_argument(
+        "--no-header",
+        action="store_true",
+        default=False,
+        help="Treat the first row as data instead of a header; emit an empty header row.",
+    )
+    parser.add_argument(
         "file",
         nargs="?",
         default=None,
@@ -47,7 +53,7 @@ def main(argv: list[str] | None = None) -> int:
     csv_path = Path(args.file) if args.file and args.file != "-" else None
     rows = _read_csv_file(csv_path) if csv_path else _read_csv_stream(sys.stdin)
 
-    output = convert(rows, align=args.align)
+    output = convert(rows, align=args.align, no_header=args.no_header)
     sys.stdout.write(output + "\n")
     return 0
 

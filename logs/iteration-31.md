@@ -635,3 +635,38 @@ Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/README.m
  
 
 [0m
+Now commit and push:
+[0m$ [0mcd /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum && git add . && git commit -m "Feature: escape pipes, newlines to <br>, pad short rows (Task 5)" && git push origin main
+[wiggum/session 06b8feb] Feature: escape pipes, newlines to <br>, pad short rows (Task 5)
+ 6 files changed, 728 insertions(+), 2 deletions(-)
+ create mode 100644 logs/iteration-31.md
+Everything up-to-date
+[0m
+[0m$ [0mcd /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum && git log --oneline -3
+06b8feb Feature: escape pipes, newlines to <br>, pad short rows (Task 5)
+5c7f654 Iteration 30: Task 5: Escape pipe characters and replace newlines inside cells with br tags so the table never breaks, and pad short rows to the header width, with pytest tests
+5308f44 Iteration 29: Task 5: Escape pipe characters and replace newlines inside cells with br tags so the table never breaks, and pad short rows to the header width, with pytest tests
+[0m
+[91m[1mError: [0m[Poolside] poolside/laguna-s-2.1:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations
+```
+
+## TASKS.md After Iteration
+
+```markdown
+# csv2md-wiggum
+
+**Mission:** csv2md, a small Python command-line tool that converts a CSV file into a GitHub-flavoured Markdown table. Standard library only (argparse, csv). Tests with pytest.
+
+## Tasks
+
+- [x] Task 1: Create the package skeleton - csv2md/__init__.py, csv2md/cli.py with an argparse entry point runnable as python -m csv2md, a tests/ folder, requirements.txt listing pytest, and a GitHub Actions workflow at .github/workflows/test.yml that runs pytest
+- [x] Task 2: Implement the core conversion - a function convert(rows) in csv2md/core.py that turns a list of CSV rows into a Markdown table with a header row and a separator row, and wire the CLI to read a CSV file path argument and print the table, with pytest tests
+- [x] Task 3: Add reading from stdin when no file path is given or the path is a single dash, with pytest tests
+- [x] Task 4: Add an --align option accepting left, right or center that changes the separator row to the matching Markdown alignment syntax, with pytest tests for all three values
+- [x] Task 5: Escape pipe characters and replace newlines inside cells with br tags so the table never breaks, and pad short rows to the header width, with pytest tests
+- [ ] Task 6: Add a --no-header option that treats the first CSV row as data and emits an empty header row, with pytest tests
+- [ ] Task 7: Handle errors cleanly - a missing file, an empty input and a malformed CSV must each print a one-line message to stderr and exit with status 1 and no traceback, with pytest tests
+- [ ] Task 8: Write README.md with installation, usage examples for every option, and a sample input and output
+```
+
+**Completed at:** Sat Oct 10 14:52:51 EDT 2026

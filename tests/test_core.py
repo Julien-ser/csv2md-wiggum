@@ -120,3 +120,31 @@ class TestConvert:
         result = convert(rows)
         assert "| A\\|B | C |" in result
         assert "| 1 |  |" in result
+
+    def test_no_header_emits_empty_header_row(self):
+        """--no-header emits an empty header row and treats first row as data."""
+        rows = [["Alice", "30"], ["Bob", "25"]]
+        result = convert(rows, no_header=True)
+        expected = "|  |  |\n| --- | --- |\n| Alice | 30 |\n| Bob | 25 |"
+        assert result == expected
+
+    def test_no_header_single_row(self):
+        """--no-header with a single row emits empty header + separator + data."""
+        rows = [["Alice", "30"]]
+        result = convert(rows, no_header=True)
+        expected = "|  |  |\n| --- | --- |\n| Alice | 30 |"
+        assert result == expected
+
+    def test_no_header_with_align(self):
+        """--no-header combined with alignment."""
+        rows = [["A", "B"], ["1", "2"]]
+        result = convert(rows, align="right", no_header=True)
+        expected = "|  |  |\n| ---: | ---: |\n| A | B |\n| 1 | 2 |"
+        assert result == expected
+
+    def test_no_header_short_row_padded(self):
+        """--no-header pads short rows to the first row width."""
+        rows = [["A", "B", "C"], ["1"]]
+        result = convert(rows, no_header=True)
+        expected = "|  |  |  |\n| --- | --- | --- |\n| A | B | C |\n| 1 |  |  |"
+        assert result == expected

@@ -2,7 +2,7 @@
 
 A small command-line tool that converts a CSV file into a GitHub-flavoured Markdown table. Standard library only (argparse, csv).
 
-**Status:** Task 7 — Clean error handling complete
+**Status:** Complete
 
 ## Requirements
 
@@ -71,6 +71,28 @@ Bob,25,"San Francisco"
 ### With alignment
 
 ```bash
+python -m csv2md --align left sample.csv
+```
+
+```markdown
+| Name | Age | City |
+| :--- | :--- | :--- |
+| Alice | 30 | New York |
+| Bob | 25 | San Francisco |
+```
+
+```bash
+python -m csv2md --align right sample.csv
+```
+
+```markdown
+| Name | Age | City |
+| ---: | ---: | ---: |
+| Alice | 30 | New York |
+| Bob | 25 | San Francisco |
+```
+
+```bash
 python -m csv2md --align center sample.csv
 ```
 
@@ -80,6 +102,8 @@ python -m csv2md --align center sample.csv
 | Alice | 30 | New York |
 | Bob | 25 | San Francisco |
 ```
+
+Shorthand: `-a left`, `-a right`, `-a center`.
 
 ### Without header
 

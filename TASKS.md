@@ -11,4 +11,4 @@
 - [x] Task 5: Escape pipe characters and replace newlines inside cells with br tags so the table never breaks, and pad short rows to the header width, with pytest tests
 - [x] Task 6: Add a --no-header option that treats the first CSV row as data and emits an empty header row, with pytest tests
 - [x] Task 7: Handle errors cleanly - a missing file, an empty input and a malformed CSV must each print a one-line message to stderr and exit with status 1 and no traceback, with pytest tests
-- [ ] Task 8: Write README.md with installation, usage examples for every option, and a sample input and output
+- [x] Task 8: Write README.md with installation, usage examples for every option, and a sample input and output

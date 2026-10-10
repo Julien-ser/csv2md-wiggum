@@ -5,7 +5,7 @@
 ## Tasks
 
 - [x] Task 1: Create the package skeleton - csv2md/__init__.py, csv2md/cli.py with an argparse entry point runnable as python -m csv2md, a tests/ folder, requirements.txt listing pytest, and a GitHub Actions workflow at .github/workflows/test.yml that runs pytest
-- [ ] Task 2: Implement the core conversion - a function convert(rows) in csv2md/core.py that turns a list of CSV rows into a Markdown table with a header row and a separator row, and wire the CLI to read a CSV file path argument and print the table, with pytest tests
+- [x] Task 2: Implement the core conversion - a function convert(rows) in csv2md/core.py that turns a list of CSV rows into a Markdown table with a header row and a separator row, and wire the CLI to read a CSV file path argument and print the table, with pytest tests
 - [ ] Task 3: Add reading from stdin when no file path is given or the path is a single dash, with pytest tests
 - [ ] Task 4: Add an --align option accepting left, right or center that changes the separator row to the matching Markdown alignment syntax, with pytest tests for all three values
 - [ ] Task 5: Escape pipe characters and replace newlines inside cells with br tags so the table never breaks, and pad short rows to the header width, with pytest tests

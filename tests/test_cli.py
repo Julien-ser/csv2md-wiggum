@@ -1,5 +1,6 @@
 """Tests for the csv2md CLI."""
 
+import csv
 import subprocess
 import sys
 from pathlib import Path
@@ -115,3 +116,59 @@ def test_cli_no_header():
     assert "| --- | --- |" in result.stdout
     # First row (Alice, 30) appears as data
     assert "| Alice | 30 |" in result.stdout
+
+
+def test_cli_missing_file():
+    """A non-existent file prints an error to stderr and exits 1."""
+    result = subprocess.run(
+        [sys.executable, "-m", "csv2md", "does_not_exist.csv"],
+        capture_output=True,
+        text=True,
+        cwd=".",
+    )
+    assert result.returncode == 1
+    assert "cannot open file" in result.stderr
+    assert result.stdout == ""
+
+
+def test_cli_empty_input():
+    """Empty stdin prints an error to stderr and exits 1."""
+    result = subprocess.run(
+        [sys.executable, "-m", "csv2md"],
+        input="",
+        capture_output=True,
+        text=True,
+        cwd=".",
+    )
+    assert result.returncode == 1
+    assert "empty input" in result.stderr
+
+
+def test_cli_empty_file():
+    """An empty CSV file prints an error to stderr and exits 1."""
+    empty_path = Path("tests/empty_test.csv")
+    empty_path.write_text("")
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "csv2md", str(empty_path)],
+            capture_output=True,
+            text=True,
+            cwd=".",
+        )
+         assert result.returncode == 1
+        assert "empty input" in result.stderr
+    finally:
+        empty_path.unlink(missing_ok=True)
+
+
+def test_cli_malformed_csv():
+    """A malformed CSV prints an error to stderr, exits 1, and shows no traceback."""
+    from unittest import mock
+    from io import StringIO
+    from csv2md import cli as cli_module
+
+    with mock.patch.object(cli_module, "_read_csv_stream", side_effect=csv.Error("unexpected end of data")):
+        with mock.patch("sys.stderr", new=StringIO()):
+            exit_code = cli_module.main([])
+            assert exit_code == 1
+            assert "malformed CSV" in sys.stderr.getvalue()

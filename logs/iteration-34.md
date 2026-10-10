@@ -484,3 +484,269 @@ Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/TASKS.md
  - [ ] Task 8: Write README.md with installation, usage examples for every option, and a sample input and output
 
 [0m
+[0m$ [0mgit add -A && git commit -m "Feature: --no-header option with tests (Task 6 complete)" && git push origin main 2>&1
+[wiggum/session 82a8e6a] Feature: --no-header option with tests (Task 6 complete)
+ 3 files changed, 488 insertions(+), 1 deletion(-)
+ create mode 100644 logs/iteration-34.md
+Everything up-to-date
+[0m
+[0m# [0mTodos
+[•] Task 7: Handle errors cleanly - missing file, empty input, malformed CSV
+[ ] Task 8: Write README.md
+[0m
+Task 6 complete. Now moving to Task 7: error handling for missing file, empty input, and malformed CSV.
+[0m→ [0mRead csv2md/cli.py
+[0m
+[0m← [0mEdit csv2md/cli.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/csv2md/cli.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/csv2md/cli.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/csv2md/cli.py
+@@ -50,10 +50,22 @@
+ )
+ args = parser.parse_args(argv)
+ 
+ csv_path = Path(args.file) if args.file and args.file != "-" else None
+-rows = _read_csv_file(csv_path) if csv_path else _read_csv_stream(sys.stdin)
+ 
++try:
++    rows = _read_csv_file(csv_path) if csv_path else _read_csv_stream(sys.stdin)
++except FileNotFoundError:
++    print(f"csv2md: cannot open file: {args.file}", file=sys.stderr)
++    return 1
++except csv.Error as exc:
++    print(f"csv2md: malformed CSV: {exc}", file=sys.stderr)
++    return 1
++
++if not rows:
++    print("csv2md: empty input", file=sys.stderr)
++    return 1
++
+ output = convert(rows, align=args.align, no_header=args.no_header)
+ sys.stdout.write(output + "\n")
+ return 0
+ 
+
+[0m
+Now I need to update `cli.py` to handle errors cleanly and add tests.
+Now let me add tests for the error handling.
+[0m→ [0mRead tests/test_cli.py[90m [offset=100][0m
+[0m
+[0m← [0mEdit tests/test_cli.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+@@ -114,4 +114,47 @@
+     assert "|  |  |" in result.stdout
+     assert "| --- | --- |" in result.stdout
+     # First row (Alice, 30) appears as data
+     assert "| Alice | 30 |" in result.stdout
++
++
++def test_cli_missing_file():
++    """A non-existent file prints an error to stderr and exits 1."""
++    result = subprocess.run(
++        [sys.executable, "-m", "csv2md", "does_not_exist.csv"],
++        capture_output=True,
++        text=True,
++        cwd=".",
++    )
++    assert result.returncode == 1
++    assert "cannot open file" in result.stderr
++    assert result.stdout == ""
++
++
++def test_cli_empty_input():
++    """Empty stdin prints an error to stderr and exits 1."""
++    result = subprocess.run(
++        [sys.executable, "-m", "csv2md"],
++        input="",
++        capture_output=True,
++        text=True,
++        cwd=".",
++    )
++    assert result.returncode == 1
++    assert "empty input" in result.stderr
++
++
++def test_cli_empty_file():
++    """An empty CSV file prints an error to stderr and exits 1."""
++    empty_path = Path("tests/empty_test.csv")
++    empty_path.write_text("")
++    try:
++        result = subprocess.run(
++            [sys.executable, "-m", "csv2md", str(empty_path)],
++            capture_output=True,
++            text=True,
++            cwd=".",
++        )
++        assert result.returncode == 1
++        assert "empty input" in result.stderr
++    finally:
++        empty_path.unlink(missing_ok=True)
+
+[0m
+Let me also update the error handling to catch broader file access errors and add the malformed CSV test.
+[0m→ [0mRead csv2md/cli.py[90m [offset=50][0m
+[0m✗ [0mEdit /home/julien/Desktop/Free-Wiggum-opopen/projects/csv2md-wiggum/csv2md/cli.py failed
+[91m[1mError: [0mNo changes to apply: oldString and newString are identical.
+Let me broaden the file error handling to catch all OSError (including directories):
+[0m
+[0m← [0mEdit csv2md/cli.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/csv2md/cli.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/csv2md/cli.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/csv2md/cli.py
+@@ -56,8 +56,11 @@
+     rows = _read_csv_file(csv_path) if csv_path else _read_csv_stream(sys.stdin)
+ except FileNotFoundError:
+     print(f"csv2md: cannot open file: {args.file}", file=sys.stderr)
+     return 1
++except IsADirectoryError:
++    print(f"csv2md: {args.file} is a directory", file=sys.stderr)
++    return 1
+ except csv.Error as exc:
+     print(f"csv2md: malformed CSV: {exc}", file=sys.stderr)
+     return 1
+ 
+
+[0m
+Now add the malformed CSV test using mocking:
+[0m→ [0mRead tests/test_cli.py[90m [offset=145][0m
+[0m
+[0m← [0mEdit tests/test_cli.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+@@ -153,8 +153,19 @@
+             capture_output=True,
+             text=True,
+             cwd=".",
+         )
+-        assert result.returncode == 1
++         assert result.returncode == 1
+         assert "empty input" in result.stderr
+     finally:
+         empty_path.unlink(missing_ok=True)
++
++
++def test_cli_malformed_csv():
++    """A malformed CSV prints an error to stderr, exits 1, and shows no traceback."""
++    from unittest import mock
++    from csv2md import cli as cli_module
++
++    with mock.patch.object(cli_module, "_read_csv_stream", side_effect=csv.Error("unexpected end of data")):
++        exit_code = cli_module.main([])
++        assert exit_code == 1
++        assert "malformed CSV" in sys.stderr.getvalue()
+
+[0m
+[0m← [0mEdit tests/test_cli.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+@@ -162,10 +162,12 @@
+ 
+ def test_cli_malformed_csv():
+     """A malformed CSV prints an error to stderr, exits 1, and shows no traceback."""
+     from unittest import mock
++    from io import StringIO
+     from csv2md import cli as cli_module
+ 
+     with mock.patch.object(cli_module, "_read_csv_stream", side_effect=csv.Error("unexpected end of data")):
+-        exit_code = cli_module.main([])
+-        assert exit_code == 1
+-        assert "malformed CSV" in sys.stderr.getvalue()
++        with mock.patch("sys.stderr", new=StringIO()):
++            exit_code = cli_module.main([])
++            assert exit_code == 1
++            assert "malformed CSV" in sys.stderr.getvalue()
+
+[0m
+I need to fix the test - `sys.stderr` isn't a StringIO. Let me use proper mocking:
+[0m← [0mEdit tests/test_cli.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py
+@@ -1,6 +1,7 @@
+ """Tests for the csv2md CLI."""
+ 
++import csv
+ import subprocess
+ import sys
+ from pathlib import Path
+ from textwrap import dedent
+
+[0m
+Now add the `csv` import at the top of the test file:
+[0m$ [0mpython -m pytest tests/ -v 2>&1
+============================= test session starts ==============================
+platform linux -- Python 3.14.7, pytest-9.0.2, pluggy-1.6.0 -- /usr/bin/python
+cachedir: .pytest_cache
+rootdir: /home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collecting ... collected 21 items / 1 error
+
+==================================== ERRORS ====================================
+______________________ ERROR collecting tests/test_cli.py ______________________
+../../../../.local/lib/python3.14/site-packages/_pytest/python.py:507: in importtestmodule
+    mod = import_path(
+../../../../.local/lib/python3.14/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/usr/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+../../../../.local/lib/python3.14/site-packages/_pytest/assertion/rewrite.py:188: in exec_module
+    source_stat, co = _rewrite_test(fn, self.config)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../../.local/lib/python3.14/site-packages/_pytest/assertion/rewrite.py:357: in _rewrite_test
+    tree = ast.parse(source, filename=strfn)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/ast.py:46: in parse
+    return compile(source, filename, mode, flags,
+E     File "/home/julien/Desktop/Free-Wiggum-opencode/projects/csv2md-wiggum/tests/test_cli.py", line 158
+E       assert result.returncode == 1
+E   IndentationError: unexpected indent
+=========================== short test summary info ============================
+ERROR tests/test_cli.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+=============================== 1 error in 0.24s ===============================
+[0m
+[93m[1m! [0mpermission requested: external_directory (/home/julien/Desktop/Free-Wiggum-opencocsv2md-wiggum/tests/*); auto-rejecting
+[0m✗ [0mRead /home/julien/Desktop/Free-Wiggum-opencocsv2md-wiggum/tests/test_cli.py failed[90m [offset=145][0m
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+```
+
+## TASKS.md After Iteration
+
+```markdown
+# csv2md-wiggum
+
+**Mission:** csv2md, a small Python command-line tool that converts a CSV file into a GitHub-flavoured Markdown table. Standard library only (argparse, csv). Tests with pytest.
+
+## Tasks
+
+- [x] Task 1: Create the package skeleton - csv2md/__init__.py, csv2md/cli.py with an argparse entry point runnable as python -m csv2md, a tests/ folder, requirements.txt listing pytest, and a GitHub Actions workflow at .github/workflows/test.yml that runs pytest
+- [x] Task 2: Implement the core conversion - a function convert(rows) in csv2md/core.py that turns a list of CSV rows into a Markdown table with a header row and a separator row, and wire the CLI to read a CSV file path argument and print the table, with pytest tests
+- [x] Task 3: Add reading from stdin when no file path is given or the path is a single dash, with pytest tests
+- [x] Task 4: Add an --align option accepting left, right or center that changes the separator row to the matching Markdown alignment syntax, with pytest tests for all three values
+- [x] Task 5: Escape pipe characters and replace newlines inside cells with br tags so the table never breaks, and pad short rows to the header width, with pytest tests
+- [x] Task 6: Add a --no-header option that treats the first CSV row as data and emits an empty header row, with pytest tests
+- [ ] Task 7: Handle errors cleanly - a missing file, an empty input and a malformed CSV must each print a one-line message to stderr and exit with status 1 and no traceback, with pytest tests
+- [ ] Task 8: Write README.md with installation, usage examples for every option, and a sample input and output
+```
+
+**Completed at:** Sat Oct 10 15:00:15 EDT 2026

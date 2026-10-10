@@ -51,7 +51,22 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     csv_path = Path(args.file) if args.file and args.file != "-" else None
-    rows = _read_csv_file(csv_path) if csv_path else _read_csv_stream(sys.stdin)
+
+    try:
+        rows = _read_csv_file(csv_path) if csv_path else _read_csv_stream(sys.stdin)
+    except FileNotFoundError:
+        print(f"csv2md: cannot open file: {args.file}", file=sys.stderr)
+        return 1
+    except IsADirectoryError:
+        print(f"csv2md: {args.file} is a directory", file=sys.stderr)
+        return 1
+    except csv.Error as exc:
+        print(f"csv2md: malformed CSV: {exc}", file=sys.stderr)
+        return 1
+
+    if not rows:
+        print("csv2md: empty input", file=sys.stderr)
+        return 1
 
     output = convert(rows, align=args.align, no_header=args.no_header)
     sys.stdout.write(output + "\n")

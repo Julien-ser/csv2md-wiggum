@@ -97,3 +97,21 @@ def test_cli_align_short_flag():
     )
     assert result.returncode == 0
     assert "| ---: | ---: |" in result.stdout
+
+
+def test_cli_no_header():
+    """--no-header treats first row as data and emits empty header."""
+    csv_input = "Alice,30\nBob,25\n"
+    result = subprocess.run(
+        [sys.executable, "-m", "csv2md", "--no-header"],
+        input=csv_input,
+        capture_output=True,
+        text=True,
+        cwd=".",
+    )
+    assert result.returncode == 0
+    # Empty header row: two empty cells
+    assert "|  |  |" in result.stdout
+    assert "| --- | --- |" in result.stdout
+    # First row (Alice, 30) appears as data
+    assert "| Alice | 30 |" in result.stdout

@@ -2,15 +2,53 @@
 
 import subprocess
 import sys
+from pathlib import Path
+from textwrap import dedent
 
 
-def test_module_runs():
-    """python -m csv2md should run with exit code 0."""
+def test_module_runs_no_args():
+    """python -m csv2md with no args reads from stdin and exits 0."""
     result = subprocess.run(
         [sys.executable, "-m", "csv2md"],
+        input="",
         capture_output=True,
         text=True,
         cwd=".",
     )
     assert result.returncode == 0
-    assert "csv2md is ready" in result.stdout
+
+
+def test_cli_converts_csv_file():
+    """python -m csv2md converts a CSV file to Markdown."""
+    csv_content = "Name,Age\nAlice,30\nBob,25\n"
+    csv_path = Path("tests/sample.csv")
+    csv_path.write_text(csv_content)
+
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "csv2md", str(csv_path)],
+            capture_output=True,
+            text=True,
+            cwd=".",
+        )
+        assert result.returncode == 0
+        assert "| Name | Age |" in result.stdout
+        assert "| --- | --- |" in result.stdout
+        assert "| Alice | 30 |" in result.stdout
+        assert "| Bob | 25 |" in result.stdout
+    finally:
+        csv_path.unlink(missing_ok=True)
+
+
+def test_cli_stdin_dash():
+    """python -m csv2md - reads from stdin via dash."""
+    csv_input = "Name,Age\nAlice,30\n"
+    result = subprocess.run(
+        [sys.executable, "-m", "csv2md", "-"],
+        input=csv_input,
+        capture_output=True,
+        text=True,
+        cwd=".",
+    )
+    assert result.returncode == 0
+    assert "| Name | Age |" in result.stdout

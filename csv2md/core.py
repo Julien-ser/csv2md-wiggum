@@ -32,13 +32,15 @@ def convert(rows: list[list[str]], align: Align = None) -> str:
         return ""
 
     header = rows[0]
+    width = len(header)
     lines: list[str] = []
 
-    lines.append(_format_row(header))
-    lines.append(_format_separator(len(header), align))
+    lines.append(_format_row(_escape_cells(header)))
+    lines.append(_format_separator(width, align))
 
     for row in rows[1:]:
-        lines.append(_format_row(row))
+        padded = _pad_row(row, width)
+        lines.append(_format_row(_escape_cells(padded)))
 
     return "\n".join(lines)
 
